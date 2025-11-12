@@ -1,0 +1,7 @@
+# Ignore the specified folder and all its contents
+.angular/
+node_modules/
+dist/
+public/demo/images/
+public/images/
+public/layout/images/
