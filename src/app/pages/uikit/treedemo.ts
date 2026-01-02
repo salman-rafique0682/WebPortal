@@ -298,12 +298,12 @@ export class TreeDemo implements OnInit {
         // Example: Log the node or trigger edit logic
         console.log('Editing node:', rowNode.data);
 
-        // // Optional: Show a toast notification
-        // this.messageService.add({
-        //     severity: 'info',
-        //     summary: 'Edit',
-        //     detail: `Editing ${rowNode.data.name}`,
-        // });
+        // Optional: Show a toast notification
+        this.messageService.add({
+            severity: 'info',
+            summary: 'Edit',
+            detail: `Editing`,//${rowNode.data.name}
+        });
 
         // Add your edit logic here, e.g., open a dialog, navigate to an edit form, etc.
         // Example: this.router.navigate(['/edit', rowNode.data.id]);

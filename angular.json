@@ -70,6 +70,12 @@
                             "buildTarget": "poseidon-ng:build:development"
                         }
                     },
+                    "options": {
+                        "host": "0.0.0.0",  
+                        "allowedHosts": [
+                                    ".nip.io"  
+                        ]
+                    },
                     "defaultConfiguration": "development"
                 },
                 "extract-i18n": {

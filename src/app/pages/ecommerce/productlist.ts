@@ -5,7 +5,22 @@ import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RippleModule } from 'primeng/ripple';
 import { TabsModule } from 'primeng/tabs';
+import { HttpClient } from '@angular/common/http';
 
+interface Product {
+    id?: number;
+    name: string;
+    description?: string;
+    price: string;
+    category: Category;
+    rating?: number;
+    imgURL: string;
+    color?: string; // For the second section
+}
+interface Category {
+    key: string;
+    label: string;
+}
 @Component({
     selector: 'app-product-list',
     imports: [CommonModule, FormsModule, InputNumberModule, ButtonModule, RippleModule, TabsModule],
@@ -18,17 +33,17 @@ import { TabsModule } from 'primeng/tabs';
                     <div class="p-2">
                         <div class="shadow p-6 bg-surface-0 dark:bg-surface-900 rounded">
                             <div class="relative mb-4">
-                                <span class="bg-surface-0 dark:bg-surface-900 text-surface-900 dark:text-surface-0 shadow px-4 py-2 absolute rounded-3xl" style="left: 1rem; top: 1rem">Category</span>
-                                <img [src]="product.image" class="w-full" />
+                                <span class="bg-surface-0 dark:bg-surface-900 text-surface-900 dark:text-surface-0 shadow px-4 py-2 absolute rounded-3xl" style="left: 1rem; top: 1rem">{{ product.category?.label }}</span>
+                                <img [src]="product.imgURL" class="w-full" />
                             </div>
                             <div class="flex justify-between items-center mb-4">
-                                <span class="text-surface-900 dark:text-surface-0 font-medium text-xl">Product Name</span>
+                                <span class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{product.name}}</span>
                                 <span>
                                     <i class="pi pi-star-fill text-yellow-500 mr-1"></i>
                                     <span class="font-medium">5.0</span>
                                 </span>
                             </div>
-                            <p class="mt-0 mb-4 text-surface-700 dark:text-surface-100 leading-normal">Enim nec dui nunc mattis enim ut tellus. Tincidunt arcu.</p>
+                            <p class="mt-0 mb-4 text-surface-700 dark:text-surface-100 leading-normal">{{ product.description }}</p>
                             <span class="text-primary text-xl font-medium">{{ product.price }}</span>
                         </div>
                     </div>
@@ -36,7 +51,7 @@ import { TabsModule } from 'primeng/tabs';
             </div>
         </div>
 
-        <div class="card">
+        <!--<div class="card">
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 md:col-span-6 lg:col-span-3 mb-8 lg:mb-0" *ngFor="let product of products2">
                     <div class="mb-4 relative">
@@ -88,55 +103,69 @@ import { TabsModule } from 'primeng/tabs';
                     </div>
                 </div>
             </div>
-        </div>
+        </div>-->
     `
 })
 export class ProductList {
-    color1: string = 'Bluegray';
+    products: Product[] = [];
+    constructor(private http: HttpClient) {}
+    ngOnInit(): void {
+        // Fetch first section products
+        this.http.get<Product[]>('https://localhost:7061/api/Products').subscribe({
+            next: (data) => {
+                this.products = data;
+            },
+            error: (err) => {
+                console.error('Error loading popular products:', err);
+                // Optional: fallback to static data
+            }
+        });
+    }
+    //color1: string = 'Bluegray';
 
-    products = [
-        {
-            price: '$140.00',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-1.png'
-        },
-        {
-            price: '$82.00',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-2.png'
-        },
-        {
-            price: '$54.00',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-3.png'
-        },
-        {
-            price: '$72.00',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-4.png'
-        },
-        {
-            price: '$99.00',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-5.png'
-        },
-        {
-            price: '$89.00',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-6.png'
-        }
-    ];
+    // products = [
+    //     {
+    //         price: '$140.00',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-1.png'
+    //     },
+    //     {
+    //         price: '$82.00',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-2.png'
+    //     },
+    //     {
+    //         price: '$54.00',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-3.png'
+    //     },
+    //     {
+    //         price: '$72.00',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-4.png'
+    //     },
+    //     {
+    //         price: '$99.00',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-5.png'
+    //     },
+    //     {
+    //         price: '$89.00',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-4-6.png'
+    //     }
+    // ];
 
-    products2 = [
-        {
-            color: 'Bluegray',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-2-1.png'
-        },
-        {
-            color: 'Indigo',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-2-2.png'
-        },
-        {
-            color: 'Purple',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-2-3.png'
-        },
-        {
-            color: 'Cyan',
-            image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-2-4.png'
-        }
-    ];
+    // products2 = [
+    //     {
+    //         color: 'Bluegray',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-2-1.png'
+    //     },
+    //     {
+    //         color: 'Indigo',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-2-2.png'
+    //     },
+    //     {
+    //         color: 'Purple',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-2-3.png'
+    //     },
+    //     {
+    //         color: 'Cyan',
+    //         image: 'https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productlist/product-list-2-4.png'
+    //     }
+    // ];
 }
