@@ -14,13 +14,16 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { HttpClient } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 
+import { TreeSelectModule } from 'primeng/treeselect';
+import { TreeNode } from 'primeng/api';
+
 interface Product {
     id: number;
     name: string;
     price: string;
     code: string;
     sku: string;
-    status: string;
+    status: number;
     tags: string[];
     category: string;
     colors: string[];
@@ -28,16 +31,16 @@ interface Product {
     inStock: boolean;
     description: string;
     images: Image[];
+    imgURL: string;
 }
 
 interface Image {
     name: string;
     objectURL: string;
 }
-
 @Component({
     selector: 'app-new-product',
-    imports: [CommonModule, EditorModule, InputTextModule, FormsModule, FileUploadModule, ButtonModule, SelectModule, ToggleSwitchModule, RippleModule, ChipModule, FluidModule],
+    imports: [CommonModule, EditorModule, InputTextModule, FormsModule, FileUploadModule, ButtonModule, SelectModule, ToggleSwitchModule, RippleModule, ChipModule, FluidModule, TreeSelectModule],
     template: `
         <div class="card">
             <span class="block text-surface-900 dark:text-surface-0 font-bold text-xl mb-6">Create Product</span>
@@ -74,6 +77,9 @@ interface Image {
                         </div>
                         <div class="col-span-12">
                             <p-editor [(ngModel)]="product.description" [style]="{ height: '250px' }"></p-editor>
+                        </div>
+                        <div class="col-span-12">
+                            <input pInputText type="text" placeholder="Product Picture URL" label="Product Picture URL" [(ngModel)]="product.imgURL" />
                         </div>
                         <div class="col-span-12 mt-4">
                             <p-fileUpload
@@ -150,11 +156,22 @@ interface Image {
                             </p-chip>
                         </div>
                     </div>
-
+                    
                     <div class="border border-surface-200 dark:border-surface-700 rounded">
-                        <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Category</span>
+                        <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">
+                            Category
+                        </span>
                         <div class="p-4">
-                            <p-select [options]="categoryOptions" [(ngModel)]="product.category" placeholder="Select a category"></p-select>
+                            <p-treeselect
+                            [options]="categoryOptions"
+                            [(ngModel)]="product.category"
+                            selectionMode="single"
+                            placeholder="Select a category"
+                            optionLabel="label"
+                            optionValue="key"
+                            [filter]="true"
+                            [showClear]="true"
+                            styleClass="w-full" />
                         </div>
                     </div>
 
@@ -207,8 +224,10 @@ export class NewProduct {
     @ViewChildren('buttonEl') buttonEl!: QueryList<ElementRef>;
 
     text: string = '';
-
-    categoryOptions = ['Sneakers', 'Apparel', 'Socks'];
+    categoryOptions: TreeNode[] = []; // Will be populated from API
+    loadingCategories: boolean = true; // Optional: for showing a loader
+ 
+    
 
     colorOptions: any[] = [
         { name: 'Black', background: 'bg-gray-900' },
@@ -222,20 +241,50 @@ export class NewProduct {
         price: '',
         code: '',
         sku: '',
-        status: 'Draft',
+        status: 0,
         tags: ['Nike', 'Sneaker'],
-        category: 'Sneakers',
+        category: '',
         colors: ['Blue'],
         stock: 'Sneakers',
         inStock: true,
         description: '',
-        images: []
+        images: [],
+        imgURL: ''
     };
 
     uploadedFiles: any[] = [];
 
     showRemove: boolean = false;
-    constructor(private http: HttpClient, private messageService: MessageService) {}
+    constructor(private http: HttpClient, private messageService: MessageService) {
+    }
+    ngOnInit(): void {
+        this.loadCategories();
+    }
+loadCategories(): void {
+    this.loadingCategories = true;
+
+    // Replace this URL with your actual API endpoint
+    this.http.get<any[]>('https://localhost:7061/api/Categories') // Adjust endpoint as needed
+      .subscribe({
+        next: (apiCategories) => {
+          this.categoryOptions = apiCategories;
+          this.loadingCategories = false;
+        },
+        error: (err) => {
+          console.error('Failed to load categories:', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Could not load categories. Using fallback.'
+          });
+          // Optional: fallback to hardcoded data
+          //this.categoryOptions = this.getFallbackCategories();
+          this.loadingCategories = false;
+        }
+      });
+    }
+
+
 
     onChipRemove(item: string) {
         this.product.tags = this.product.tags.filter((i) => i !== item);
@@ -288,14 +337,15 @@ export class NewProduct {
                 price: '',
                 code: '',
                 sku: '',
-                status: 'Draft',
+                status: 0,
                 tags: ['Nike', 'Sneaker'],
-                category: 'Sneakers',
+                category: '',
                 colors: ['Blue'],
                 stock: 'Sneakers',
                 inStock: true,
                 description: '',
-                images: []
+                images: [],
+                imgURL:''
             };
             },
             error: (error) => {
@@ -308,4 +358,5 @@ export class NewProduct {
             }
         });
     }
+
 }
