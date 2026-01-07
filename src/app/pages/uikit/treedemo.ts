@@ -18,9 +18,9 @@ import { ChipModule } from 'primeng/chip';
 import { FluidModule } from 'primeng/fluid';
 import { HttpClient } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
+import { providePrimeNG } from 'primeng/config';
+import { ToastModule } from 'primeng/toast';
 
-
-import { Observable } from 'rxjs';
 interface Category {
     id: number;
     name: string;
@@ -28,7 +28,7 @@ interface Category {
 @Component({
     selector: 'app-tree-demo',
     standalone: true,
-    imports: [CommonModule, FormsModule, TreeModule, TreeTableModule, EditorModule,InputTextModule,FileUploadModule,ButtonModule,SelectModule, ToggleSwitchModule, RippleModule, ChipModule, FluidModule],
+    imports: [CommonModule, FormsModule, TreeModule, TreeTableModule, EditorModule,InputTextModule,FileUploadModule,ButtonModule,SelectModule, ToggleSwitchModule, RippleModule, ChipModule, FluidModule, ToastModule],
     template: `
         <div class="space-y-4">
             <div class="card">
@@ -206,8 +206,12 @@ interface Category {
                 </p-treetable>
             </div>
         </div>
+
+        <div class="space-y-4">
+            <p-toast></p-toast>
+        </div>
     `,
-    providers: [NodeService, CategoryService]
+    providers: [NodeService,CategoryService,MessageService]
 })
 export class TreeDemo implements OnInit {
     category: Category = {
@@ -250,6 +254,19 @@ export class TreeDemo implements OnInit {
       children: item.children ? this.transformToTreeNode(item.children) : []
     }));
   }
+//   transformToTreeNode(data: any[]): TreeNode[] {
+//   return data.map(item => {
+//     // Adjust based on exact shape of item.data
+//     const name = item.data?.name || item.name || 'Unnamed';
+
+//     return {
+//       key: item.key?.toString(), // ensure key is string
+//       label: name,                // <-- Critical: for display and toggler
+//       data: { name },             // <-- Matches your column field: 'name'
+//       children: item.children ? this.transformToTreeNode(item.children) : []
+//     };
+//   });
+// }
     ngOnInit() {
         // this.categoryService.postData4().then((files) => {this.treeValue = this.transformToTreeNode(files);})
         // .catch(error => {console.error('Error fetching data:', error);});
@@ -283,6 +300,9 @@ export class TreeDemo implements OnInit {
                 id: 0,
                 name: '',
             };
+            this.categoryService.postData4().then((files: any) => {
+                this.treeTableValue = this.transformToTreeNode(files);
+            });
             },
             error: (error) => {
             console.error('Error saving category:', error);
@@ -294,9 +314,15 @@ export class TreeDemo implements OnInit {
             }
         });
     }
-    onEditCategory(rowNode: TreeNode) {
+    // onEditCategory(rowNode: any) {
+    //     debugger;
+    //     const name = rowNode.node.data?.name || rowNode.label;
+    //     console.log('Editing node key:', rowNode.node.key, 'name:', name);
+    //     // ... your edit logic
+    // }
+    onEditCategory(rowNode: any) {
         // Example: Log the node or trigger edit logic
-        console.log('Editing node:', rowNode.data);
+        console.log('Editing node:', rowNode.node.key);
 
         // Optional: Show a toast notification
         this.messageService.add({
